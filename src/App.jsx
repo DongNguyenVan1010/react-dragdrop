@@ -30,10 +30,10 @@ for (let i = 10; i < 36; i++) {
 }
 
 function App() {
-  const [form] = Form.useForm();
-  const [open, setOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [todos, setTodos] = useState(data)
+  const [ form ] = Form.useForm();
+  const [ open, setOpen ] = useState(false);
+  const [ confirmLoading, setConfirmLoading ] = useState(false);
+  const [ todos, setTodos ] = useState(data)
 
   // using useCallback is optional
   const onDragEnd = (data) => {
@@ -42,12 +42,12 @@ function App() {
 
     const { source, destination, type } = data;
 
-    if(!destination) return;
+    if (!destination) return;
 
     // drag & drop LIST
-    if(type === 'LIST') {
-      const clonedColumns = [...todos.columns];
-      const columnRemove = clonedColumns.splice(source.index, 1)[0];
+    if (type === 'LIST') {
+      const clonedColumns = [ ...todos.columns ];
+      const columnRemove = clonedColumns.splice(source.index, 1)[ 0 ];
       clonedColumns.splice(destination.index, 0, columnRemove);
 
       setTodos(prevState => ({
@@ -59,17 +59,17 @@ function App() {
 
     // card
     // drag & drop card in same list
-    if(source.droppableId === destination.droppableId) {
-      const clonedCards = [...todos.lists[source.droppableId].cards];
-      const itemRemoved = clonedCards.splice(source.index, 1)[0];
+    if (source.droppableId === destination.droppableId) {
+      const clonedCards = [ ...todos.lists[ source.droppableId ].cards ];
+      const itemRemoved = clonedCards.splice(source.index, 1)[ 0 ];
       clonedCards.splice(destination.index, 0, itemRemoved);
       setTodos(prevState => {
         return {
           ...prevState,
           lists: {
             ...prevState.lists,
-            [destination.droppableId]: {
-              ...prevState.lists[destination.droppableId],
+            [ destination.droppableId ]: {
+              ...prevState.lists[ destination.droppableId ],
               cards: clonedCards
             }
           }
@@ -79,7 +79,36 @@ function App() {
       return
     }
 
-     // drag & drop card in difference list
+    // drag & drop card in different list
+    else {
+      const clonedColumns = [ ...todos.columns ];
+
+      const clonedCards = [ ...todos.lists[ source.droppableId ].cards ];
+      const itemRemoved = clonedCards.splice(source.index, 1)[ 0 ];
+      // clonedCards.splice(destination.index, 0, itemRemoved);
+
+      const clonedOtherCards = [ ...todos.lists[ destination.droppableId ].cards ];
+      clonedOtherCards.splice(destination.index, 0, itemRemoved);
+
+      console.log('source.index', destination.droppableId)
+      setTodos(prevState => {
+        return {
+          ...prevState,
+          columns: clonedColumns,
+          lists: {
+            ...prevState.lists,
+            [ source.droppableId ]: {
+              ...prevState.lists[ source.droppableId ],
+              cards: clonedCards
+            },
+            [ destination.droppableId ]: {
+              ...prevState.lists[ destination.droppableId ],
+              cards: clonedOtherCards
+            }
+          }
+        }
+      })
+    }
   }
 
   function handleAddList() {
@@ -91,10 +120,10 @@ function App() {
     setTodos(prevState => {
       return {
         ...prevState,
-        columns: [...prevState.columns, listItem.id],
+        columns: [ ...prevState.columns, listItem.id ],
         lists: {
           ...prevState.lists,
-          [listItem.id]: listItem
+          [ listItem.id ]: listItem
         }
       }
     })
@@ -131,65 +160,65 @@ function App() {
 
       <main>
         <div className="container flex mt-2 px-2">
-        <DragDropContext
-          onDragEnd={onDragEnd}
-        >
-          <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                // style={{ backgroundColor: snapshot.isDraggingOver ? 'blue' : 'grey' }}
-                {...provided.droppableProps}
-                className="listContainer"
-              >
-                {todos.columns.map((listId, listIndex) => {
-                  const listItem = todos.lists[listId];
-                  const cards = listItem.cards.map(cardId => todos.cards[cardId]);
+          <DragDropContext
+            onDragEnd={ onDragEnd }
+          >
+            <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
+              { (provided, snapshot) => (
+                <div
+                  ref={ provided.innerRef }
+                  // style={{ backgroundColor: snapshot.isDraggingOver ? 'blue' : 'grey' }}
+                  { ...provided.droppableProps }
+                  className="listContainer"
+                >
+                  { todos.columns.map((listId, listIndex) => {
+                    const listItem = todos.lists[ listId ];
+                    const cards = listItem.cards.map(cardId => todos.cards[ cardId ]);
 
-                  return (
-                    <TrelloList 
-                      key={listItem.id}
-                      index={listIndex}
-                      listItem={listItem}
-                      cards={cards}
-                    />
-                  )
-                })}
-        
-                {provided.placeholder}
-                <Button type="text" onClick={handleAddList}>
-                  <PlusOutlined /> Add another list
-                </Button>
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-         
+                    return (
+                      <TrelloList
+                        key={ listItem.id }
+                        index={ listIndex }
+                        listItem={ listItem }
+                        cards={ cards }
+                      />
+                    )
+                  }) }
+
+                  { provided.placeholder }
+                  <Button type="text" onClick={ handleAddList }>
+                    <PlusOutlined /> Add another list
+                  </Button>
+                </div>
+              ) }
+            </Droppable>
+          </DragDropContext>
+
         </div>
       </main>
 
       <Modal
         title="Add Card"
-        open={open}
-        onOk={form.submit}
-        onCancel={handleCancel}
-        confirmLoading={confirmLoading}
+        open={ open }
+        onOk={ form.submit }
+        onCancel={ handleCancel }
+        confirmLoading={ confirmLoading }
       >
         <br />
         <Form
           name="basic"
-          form={form}
-          initialValues={{ status: "new" }}
-          onFinish={handleSubmit}
+          form={ form }
+          initialValues={ { status: "new" } }
+          onFinish={ handleSubmit }
           autoComplete="off"
-          labelCol={{ flex: "110px" }}
+          labelCol={ { flex: "110px" } }
           labelAlign="left"
-          wrapperCol={{ flex: 1 }}
+          wrapperCol={ { flex: 1 } }
         >
           <Form.Item
             label="Title"
             name="title"
-            rules={[{ required: true, message: "Please input your title!" }]}
+            rules={ [ { required: true, message: "Please input your title!" } ] }
           >
             <Input />
           </Form.Item>
@@ -197,27 +226,27 @@ function App() {
           <Form.Item
             label="Description"
             name="description"
-            rules={[
+            rules={ [
               { required: true, message: "Please input your description!" },
-            ]}
+            ] }
           >
-            <TextArea rows={4} />
+            <TextArea rows={ 4 } />
           </Form.Item>
 
           <Form.Item
             label="Member"
             name="member"
-            rules={[
+            rules={ [
               { required: true, message: "Please input your description!" },
-            ]}
+            ] }
           >
             <Select
               mode="multiple"
               allowClear
-              style={{ width: "100%" }}
+              style={ { width: "100%" } }
               placeholder="Please select"
               optionLabelProp="label"
-              onChange={handleChange}
+              onChange={ handleChange }
             >
               <Option value="tony123" label="tony 123">
                 <div className="selectField">
@@ -236,9 +265,9 @@ function App() {
 
           <Form.Item label="Status" name="status">
             <Select
-              style={{ width: 120 }}
-              onChange={handleChange}
-              options={[
+              style={ { width: 120 } }
+              onChange={ handleChange }
+              options={ [
                 {
                   value: "new",
                   label: "New",
@@ -251,7 +280,7 @@ function App() {
                   value: "done",
                   label: "Done",
                 },
-              ]}
+              ] }
             />
           </Form.Item>
         </Form>
